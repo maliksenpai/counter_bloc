@@ -37,7 +37,6 @@ class CounterPage extends StatefulWidget {
 }
 
 class _CounterPageState extends State<CounterPage> {
-
   late TimerBloc timerBloc;
   int value = 0;
 
@@ -54,46 +53,69 @@ class _CounterPageState extends State<CounterPage> {
       body: Container(
         child: BlocListener(
           cubit: timerBloc,
-          listener: (context, state){
-            if(state is IncrementedState){
+          listener: (context, state) {
+            if (state is IncrementedState) {
               setState(() {
                 value = state.value;
               });
-            }else if(state is DescedState){
+            } else if (state is DescedState) {
               setState(() {
                 value = state.value;
               });
-            }else if(state is ResetedState){
+            } else if (state is ResetedState) {
               setState(() {
                 value = state.value;
               });
+            } else if (state is ErroredState) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("0'dan daha küçük değer girilemez"),
+                action: SnackBarAction(
+                  label: 'Undo',
+                  onPressed: () {
+                    // Some code to undo the change.
+                  },
+                ),
+              ));
+
+              timerBloc.add(ResetEvent());
             }
           },
-          child: Column(
-            children: [
-              Text(value.toString()),
-              IconButton(
-                icon: Icon(Icons.add),
-                onPressed: (){
-                  value++;
-                  timerBloc.add(IncrementEvent(currValue: value));
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.clear),
-                onPressed: (){
-                  value--;
-                  timerBloc.add(DescEvent(currValue: value));
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.camera),
-                onPressed: (){
-                  timerBloc.add(ResetEvent());
-                },
-              ),
-
-            ],
+          child: Padding(
+            padding: const EdgeInsets.only(top: 58.0),
+            child: Column(
+              children: [
+                Text(value.toString()),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.add),
+                      onPressed: () {
+                        value++;
+                        timerBloc.add(IncrementEvent(currValue: value));
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.clear),
+                      onPressed: () {
+                        value--;
+                        if (value < 0) {
+                          timerBloc.add(ErrorEvent());
+                        } else {
+                          timerBloc.add(DescEvent(currValue: value));
+                        }
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.camera),
+                      onPressed: () {
+                        timerBloc.add(ResetEvent());
+                      },
+                    ),
+                  ],
+                )
+              ],
+            ),
           ),
         ),
       ),

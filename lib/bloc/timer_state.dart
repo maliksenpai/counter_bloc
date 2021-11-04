@@ -24,3 +24,9 @@ class ResetedState extends TimerState{
   ResetedState({required this.value});
 
 }
+
+class ErroredState extends TimerState{
+
+
+
+}
